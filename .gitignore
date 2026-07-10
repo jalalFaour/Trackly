@@ -1,0 +1,61 @@
+# ==============================
+# Trackly (Monorepo) .gitignore
+# ==============================
+
+# OS / editors
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.log
+.idea/
+.vscode/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node/Express common artifacts
+.env
+.env.*
+coverage/
+.nyc_output/
+dist/
+build/
+
+# Backend runtime
+src/config/*.local.*
+
+# Flutter / Dart
+.flutter-plugins
+.dart_tool/
+.pub-cache/
+/build/
+coverage/
+
+# Flutter iOS/Android build outputs
+**/ios/Flutter/.
+**/ios/Flutter/Flutter-Debug.xcconfig
+**/ios/Flutter/Flutter-Release.xcconfig
+
+# IntelliJ/Android Studio
+*.iml
+.gradle/
+
+# Dart/Flutter crash reports
+crashlytics*
+
+# =====================================
+# Custom: ignore pre-existing generated folders
+# =====================================
+trackly_backend/node_modules/
+trackly_mobile/build/
+trackly_mobile/.dart_tool/
+trackly_mobile/.pub-cache/
+
+# Make sure these folders are still tracked if empty (optional)
+# (Git cannot track empty directories)
+

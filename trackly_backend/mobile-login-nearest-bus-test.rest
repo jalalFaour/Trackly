@@ -1,0 +1,53 @@
+@baseUrl = http://localhost:3000
+@json = application/json
+
+### ===== Mobile auth (JWT) =====
+@mobileName = Demo User
+@mobilePhone = +963944886200
+@mobilePassword = asdasd
+
+### 1) Mobile signup (optional; comment out if already exists)
+POST {{baseUrl}}/api/mobile/auth/signup
+Content-Type: {{json}}
+
+{
+  "name": "{{mobileName}}",
+  "phone": "{{mobilePhone}}",
+  "password": "{{mobilePassword}}"
+}
+
+### 2) Mobile login (captures access token)
+POST {{baseUrl}}/api/mobile/auth/login
+Content-Type: {{json}}
+
+{
+  "phone": "{{mobilePhone}}",
+  "password": "{{mobilePassword}}"
+}
+
+### Paste accessToken from LOGIN response here (or update manually)
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTM4MGQ2ODNmZjM5NDIyOGE4MDhiM2UiLCJpYXQiOjE3ODI0MjMwMTYsImV4cCI6MTc4MzcxOTAxNn0.IFW-23wpXBOik73hXEEj6rm7j4Z6QGXp9De3uCTyZBI
+
+### 3) Sanity check (requires access token)
+GET {{baseUrl}}/api/mobile/profile
+Authorization: Bearer {{accessToken}}
+
+### ===== Nearest bus test (SSE stream) =====
+### NOTE: This backend streams the result as SSE.
+### Open the request and watch the event output.
+
+@routeId = 69deff5984e8c0f2d5ac46be
+@latitude = 36.1999
+@longitude = 37.1499
+
+### 4) Stream nearest upcoming bus for given route + location
+POST {{baseUrl}}/api/mobile/nearest-bus/stream
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "routeId": "{{routeId}}",
+  "latitude": {{latitude}},
+  "longitude": {{longitude}}
+}
+

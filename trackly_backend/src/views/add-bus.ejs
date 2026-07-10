@@ -1,0 +1,162 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid px-4 py-3">
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+    <div>
+      <h1 class="h3 fw-bold text-dark mb-1">Add New Bus</h1>
+      <p class="text-muted small mb-0">Create a new bus entry and optionally assign it to an operational route.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/buses" class="btn btn-sm btn-light border d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Buses
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card border-0 shadow-sm bg-white">
+        <div class="card-body p-4">
+
+
+          <form id="addBusForm">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small text-muted">Hardware Device ID</label>
+                <input class="form-control" name="deviceId" type="text" placeholder="e.g. device-001" required />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-muted">Bus Number</label>
+                <input class="form-control" name="busNumber" type="text" placeholder="e.g. BUS-12" required />
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-muted">Status</label>
+                <select class="form-select" name="status">
+                  <option value="idle" selected>idle</option>
+                  <option value="active">active</option>
+                  <option value="maintenance">maintenance</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label small text-muted">Assign to Route (optional)</label>
+                <select class="form-select" name="routeId">
+                  <option value="">Unassigned</option>
+                  <% if (routesForAdmin && routesForAdmin.length) { %>
+                  <% routesForAdmin.forEach(r => { %>
+                  <option value="<%= r._id %>"><%= r.routeName %></option>
+                  <% }) %>
+                  <% } %>
+                </select>
+              </div>
+
+              <div class="col-12 d-flex flex-wrap gap-2 align-items-center">
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="bi bi-plus-lg me-1"></i> Create Bus
+                </button>
+                <button type="button" class="btn btn-outline-secondary px-4" onclick="window.location.href='/buses'">
+                  Cancel
+                </button>
+              </div>
+
+              <div class="col-12">
+                <div id="formError" class="alert alert-danger d-none" role="alert"></div>
+                <div id="formSuccess" class="alert alert-success d-none" role="alert"></div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card border-0 shadow-sm bg-white h-100">
+        <div class="card-body p-4">
+          <h2 class="h6 fw-bold text-secondary text-uppercase tracking-wider mb-3">Current Routes</h2>
+
+          <% if (routesForAdmin && routesForAdmin.length) { %>
+          <div class="list-group list-group-flush">
+            <% routesForAdmin.slice(0, 8).forEach(r => { %>
+            <div class="list-group-item px-0 py-2 bg-transparent">
+              <div class="d-flex align-items-start justify-content-between gap-2">
+                <div>
+                  <div class="fw-semibold text-dark"><%= r.routeName %></div>
+                  <div class="text-muted small"><%= typeof r.routeLengthKm === 'number' ? r.routeLengthKm.toFixed(2) : '0.00' %> km</div>
+                </div>
+                <span class="badge bg-light text-secondary border">route</span>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% if (routesForAdmin.length > 8) { %>
+          <div class="text-muted small mt-2">Showing first 8 routes.</div>
+          <% } %>
+          <% } else { %>
+          <div class="text-muted">No routes found yet. Create a route first.</div>
+          <% } %>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setError(message) {
+    const el = document.getElementById('formError');
+    const successEl = document.getElementById('formSuccess');
+    if (successEl) successEl.classList.add('d-none');
+    el.textContent = message || 'Something went wrong.';
+    el.classList.remove('d-none');
+  }
+
+  function setSuccess(message) {
+    const el = document.getElementById('formError');
+    const successEl = document.getElementById('formSuccess');
+    if (el) el.classList.add('d-none');
+    successEl.textContent = message || 'Bus created successfully.';
+    successEl.classList.remove('d-none');
+  }
+
+  document.getElementById('addBusForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const payload = {
+      deviceId: formData.get('deviceId'),
+      busNumber: formData.get('busNumber'),
+      status: formData.get('status'),
+      routeId: formData.get('routeId') || null
+    };
+
+    try {
+      const res = await fetch('/api/buses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json.success) {
+        setError(json.message || json.error || 'Failed to create bus.');
+        return;
+      }
+
+      setSuccess('Bus created successfully. Redirecting...');
+      setTimeout(() => {
+        window.location.href = '/buses';
+      }, 700);
+    } catch (err) {
+      setError(err?.message || 'Failed to create bus.');
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

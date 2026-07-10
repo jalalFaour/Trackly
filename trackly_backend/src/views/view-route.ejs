@@ -1,0 +1,197 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid px-4 py-3">
+
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <i class="bi bi-map text-primary fs-3"></i>
+        <h1 class="h3 fw-bold text-dark mb-0">Viewing Route: <%= route.routeName %></h1>
+      </div>
+      <p class="text-muted small mb-0">Inspect active path alignments, visual geometries, and starting/ending transit hubs.</p>
+      <p class="mt-2 mb-0">
+        <span class="text-muted small">
+          Length:&nbsp;
+          <%= typeof route.routeLengthKm === 'number' ? (route.routeLengthKm.toFixed(2) + ' km') : '0.00 km' %>
+        </span>
+      </p>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/view-route/<%= route._id %>/stops" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2">
+        <i class="bi bi-pin-map"></i> Manage Stops
+      </a>
+      <a href="/" class="btn btn-sm btn-light border d-flex align-items-center gap-2">
+        <i class="bi bi-grid-1x2"></i> Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="card-body p-2 bg-white">
+      <div id="map"></div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  #map {
+    height: 650px;
+    width: 100%;
+    border-radius: 0.5rem;
+    z-index: 1;
+  }
+</style>
+
+<script>
+  const map = L.map('map').setView([0, 0], 2);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    referrerPolicy: 'origin-when-cross-origin'
+  }).addTo(map);
+
+  // Route Path
+  const geoJsonCoords = <%- JSON.stringify(route.path && route.path.coordinates ? route.path.coordinates : []) %>;
+  const leafletCoords = geoJsonCoords.map(c => [c[1], c[0]]);
+
+  if (leafletCoords.length > 0) {
+    const polyline = L.polyline(leafletCoords, {
+      color: '#4f46e5',
+      weight: 5,
+      opacity: 0.85
+    }).addTo(map);
+    map.fitBounds(polyline.getBounds(), {
+      padding: [30, 30]
+    });
+
+    L.marker(leafletCoords[0]).addTo(map).bindPopup('<strong>Terminal Origin:</strong> Start of Route');
+    if (leafletCoords.length > 1) {
+      L.marker(leafletCoords[leafletCoords.length - 1]).addTo(map).bindPopup('<strong>Terminal Destination:</strong> End of Route');
+    }
+  }
+
+  // Stops
+  const companyRouteStops = <%- JSON.stringify(route.stops || []) %>;
+  if (Array.isArray(companyRouteStops) && companyRouteStops.length) {
+    companyRouteStops.forEach((stop, idx) => {
+      const coords = (stop && stop.location && stop.location.coordinates) ? stop.location.coordinates : null;
+      if (!Array.isArray(coords) || coords.length < 2) return;
+      L.circleMarker([coords[1], coords[0]], {
+          radius: 7,
+          fillColor: '#ffffff',
+          fillOpacity: 1,
+          color: '#ef4444',
+          weight: 3
+        })
+        .addTo(map)
+        .bindPopup('<strong style="font-family:sans-serif;">Stop ' + (idx + 1) + ':</strong> ' + (stop.name || 'Unnamed Stop'));
+    });
+  }
+
+  // Buses and SSE
+  const routeId = '<%= route._id %>';
+  const initialBuses = <%- JSON.stringify(buses || []) %>;
+  const busMarkers = new Map();
+
+  function upsertBusMarker(bus) {
+    if (!bus || !bus._id) return;
+
+    if (!bus.lastLocation || !Array.isArray(bus.lastLocation.coordinates) || bus.lastLocation.coordinates.length < 2) {
+      console.warn('[Marker] Invalid coordinates for bus:', bus._id);
+      return;
+    }
+
+    const [lng, lat] = bus.lastLocation.coordinates;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const busId = String(bus._id);
+    const latLng = [lat, lng];
+
+    const popupHtml = `
+      <div style="font-family:sans-serif;">
+        <div><strong>Bus:</strong> ${bus.busNumber || bus.deviceId || busId}</div>
+        <div><strong>Status:</strong> ${bus.status || 'unknown'}</div>
+        <div><strong>Last update:</strong> ${bus.lastUpdate ? new Date(bus.lastUpdate).toLocaleTimeString() : '-'}</div>
+      </div>`;
+
+
+
+
+    if (busMarkers.has(busId)) {
+      const marker = busMarkers.get(busId);
+      marker.setLatLng(latLng);
+      marker.setPopupContent(popupHtml);
+      console.log(`[Marker] Updated bus ${busId} to [${lat}, ${lng}]`);
+    } else {
+      const marker = L.marker(latLng, {
+        icon: L.divIcon({
+          className: 'bus-marker',
+          html: '<div style="width:14px;height:14px;border-radius:50%;background:#10b981;border:2px solid #ffffff;box-shadow:0 2px 6px rgba(0,0,0,0.25);"></div>'
+        })
+      }).addTo(map).bindPopup(popupHtml);
+
+      busMarkers.set(busId, marker);
+      console.log(`[Marker] Created new marker for bus ${busId}`);
+    }
+  }
+
+  // Initial render
+  if (Array.isArray(initialBuses) && initialBuses.length) {
+    initialBuses.forEach(upsertBusMarker);
+  }
+
+  // SSE Implementation
+  try {
+    console.log('[SSE] Initializing connection to /api/realtime/sse...');
+    const es = new EventSource('/api/realtime/sse');
+
+    es.onopen = () => {
+      console.log('[SSE] Connection established successfully.');
+    };
+
+    es.onmessage = (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        console.log('[SSE] Raw message received:', payload);
+
+        if (payload.type !== 'bus_location_updated') {
+          console.log('[SSE] Ignoring non-location event:', payload.type);
+          return;
+        }
+
+        const incomingBus = payload.bus;
+        if (!incomingBus) return;
+
+        // Robust Route ID check
+        // If payload doesn't include routeId, don't skip—use coordinates to update the marker.
+        const payloadRouteId = incomingBus.routeId ? String(incomingBus.routeId) : null;
+        if (payloadRouteId && payloadRouteId !== routeId) {
+          console.log(`[SSE] Skipping bus ${incomingBus._id} because routeId (${payloadRouteId}) doesn't match current route (${routeId})`);
+          return;
+        }
+
+
+        console.log('[SSE] Processing location update for bus:', incomingBus._id);
+        upsertBusMarker(incomingBus);
+
+      } catch (err) {
+        console.error('[SSE] Error parsing message:', err);
+      }
+    };
+
+    es.onerror = (err) => {
+      console.error('[SSE] Error occurred:', err);
+      if (es.readyState === EventSource.CLOSED) {
+        console.log('[SSE] Connection closed by server.');
+      }
+    };
+  } catch (err) {
+    console.error('[SSE] Failed to initialize EventSource:', err);
+  }
+</script>
+
+<%- include('partials/footer') %>

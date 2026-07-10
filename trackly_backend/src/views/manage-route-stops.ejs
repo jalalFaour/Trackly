@@ -1,0 +1,300 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid px-4 py-3">
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <i class="bi bi-signpost-2 text-primary fs-3"></i>
+        <h1 class="h3 fw-bold text-dark mb-0">Manage Route: <%= route.routeName %></h1>
+      </div>
+      <p class="text-muted small mb-0">Configure specific station drop-offs, sequence order, and live geospatial node coordinate mapping.</p>
+    </div>
+    <div>
+      <a href="/" class="btn btn-sm btn-light border d-flex align-items-center gap-2">
+        <i class="bi bi-grid-1x2"></i> Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-xl-5 col-lg-6">
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+          <i class="bi bi-pin-map text-muted"></i>
+          <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider">Configured Stops Feed</h2>
+        </div>
+        <div class="card-body p-4">
+          <div id="stopsList" class="d-flex flex-column gap-2" style="max-height: 380px; overflow-y: auto;">
+            <% if (!route.stops || !route.stops.length) { %>
+            <div class="text-center py-4 text-muted small">
+              <i class="bi bi-geo fs-3 d-block mb-1 text-secondary"></i>
+              No stations mapped out on this transit segment yet.
+            </div>
+            <% } else { %>
+            <% route.stops.forEach((stop, idx) => { %>
+            <div class="p-3 bg-light rounded-3 border transition-all" data-stop-index="<%= idx %>">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div>
+                  <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <span class="badge bg-primary rounded-circle d-inline-flex align-items-center justify-content-center px-0 fs-7" style="width: 22px; height: 22px;"><%= idx + 1 %></span>
+                    <span class="stopName"><%= stop.name || 'Unnamed Stop' %></span>
+                  </div>
+                  <div class="text-muted font-monospace" style="font-size: 0.75rem;">
+                    Lat: <span class="stopLat text-secondary"><%= (stop.location && stop.location.coordinates ? stop.location.coordinates[1] : '—') %></span> |
+                    Lng: <span class="stopLng text-secondary"><%= (stop.location && stop.location.coordinates ? stop.location.coordinates[0] : '—') %></span>
+                  </div>
+                </div>
+                <div class="d-flex gap-1 flex-shrink-0">
+                  <button class="btn btn-sm btn-light border px-2 py-1" onclick="editStop(<%= idx %>)" title="Edit Stop">
+                    <i class="bi bi-pencil text-primary"></i>
+                  </button>
+                  <button class="btn btn-sm btn-light border px-2 py-1" onclick="deleteStop(<%= idx %>)" title="Delete Stop">
+                    <i class="bi bi-trash text-danger"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+          <i class="bi bi-plus-circle text-muted"></i>
+          <h2 class="h6 mb-0 fw-bold text-secondary text-uppercase tracking-wider" id="formTitle">Add Stop</h2>
+        </div>
+        <div class="card-body p-4">
+          <input type="hidden" id="editIndex" value="-1" />
+
+          <div class="form-floating mb-3">
+            <input id="stopName" class="form-control" placeholder="e.g. Stop 1" autocomplete="off" />
+            <label for="stopName" class="text-muted">Stop Station Name</label>
+          </div>
+
+          <input type="hidden" id="stopLat" value="" />
+          <input type="hidden" id="stopLng" value="" />
+
+          <div class="p-3 mb-4 bg-light border rounded-3">
+            <div class="d-flex align-items-start gap-2">
+              <i class="bi bi-hand-index-thumb text-primary mt-1"></i>
+              <div>
+                <div class="fw-semibold text-dark" style="font-size: 0.95rem;">Selected point</div>
+                <div id="selectedPointText" class="text-muted font-monospace" style="font-size: 0.8rem;">
+                  Click on the map to choose coordinates.
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary px-4 d-flex align-items-center gap-2" onclick="saveStop()">
+              <i class="bi bi-check-lg"></i> Save Node
+            </button>
+            <button class="btn btn-outline-secondary px-3" onclick="resetForm()">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-xl-7 col-lg-6">
+      <div class="card border-0 shadow-sm overflow-hidden h-100">
+        <div class="card-body p-2 bg-white">
+          <div id="map"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #map {
+    height: 650px;
+    width: 100%;
+    border-radius: 0.5rem;
+    z-index: 1;
+  }
+
+  .tracking-wider {
+    letter-spacing: 0.05em;
+  }
+
+  .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  }
+
+  .transition-all {
+    transition: all 0.2s ease-in-out;
+  }
+
+  .transition-all:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+  }
+</style>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script type="text/javascript">
+  const routeId = '<%= route._id %>';
+  const companyRouteStops = <%- JSON.stringify(route.stops || []) %>;
+
+  // Initialize Map Engine
+  const map = L.map('map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  const pathCoords = <%- JSON.stringify(route.path.coordinates || []) %>;
+  const leafletLineCoords = pathCoords.map(c => [c[1], c[0]]);
+
+  // Custom Modern SaaS styled trace line vectors (Indigo Hue)
+  const polyline = L.polyline(leafletLineCoords, {
+    color: '#4f46e5',
+    weight: 5,
+    opacity: 0.85,
+    lineJoin: 'round'
+  }).addTo(map);
+
+  if (leafletLineCoords.length) map.fitBounds(polyline.getBounds());
+
+  // Render station stops with clear custom styles
+  companyRouteStops.forEach((stop, idx) => {
+    const coords = (stop && stop.location && stop.location.coordinates) ? stop.location.coordinates : [0, 0];
+    const [lng, lat] = coords;
+
+    L.circleMarker([lat, lng], {
+        radius: 6,
+        fillColor: '#ffffff',
+        fillOpacity: 1,
+        color: '#ef4444', // Red Accent for stops
+        weight: 3
+      })
+      .addTo(map)
+      .bindPopup(`<strong style="font-family: sans-serif;">Stop ${idx + 1}:</strong> ${stop.name || 'Unnamed'}`);
+  });
+
+  // Click to select point for adding/updating a stop
+  map.on('click', function(e) {
+    updateSelectedUI(e.latlng.lat, e.latlng.lng);
+  });
+
+
+
+  async function apiCall(url, method, body) {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      alert(data.message || 'Request execution failed');
+      throw new Error(data.message || 'Request execution failed');
+    }
+    return data;
+  }
+
+  let selectedMarker = null;
+  let selectedLat = null;
+  let selectedLng = null;
+
+  function updateSelectedUI(lat, lng) {
+    selectedLat = lat;
+    selectedLng = lng;
+
+    document.getElementById('stopLat').value = lat != null ? String(lat) : '';
+    document.getElementById('stopLng').value = lng != null ? String(lng) : '';
+
+    const textEl = document.getElementById('selectedPointText');
+    if (textEl) {
+      if (lat == null || lng == null) {
+        textEl.textContent = 'Click on the map to choose coordinates.';
+      } else {
+        textEl.textContent = `Lat: ${lat} | Lng: ${lng}`;
+      }
+    }
+
+    if (selectedMarker) {
+      map.removeLayer(selectedMarker);
+      selectedMarker = null;
+    }
+
+    if (lat != null && lng != null) {
+      selectedMarker = L.circleMarker([lat, lng], {
+        radius: 8,
+        fillColor: '#ffffff',
+        fillOpacity: 1,
+        color: '#4f46e5',
+        weight: 4
+      }).addTo(map);
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('formTitle').innerText = 'Add Stop';
+    document.getElementById('editIndex').value = '-1';
+    document.getElementById('stopName').value = '';
+    updateSelectedUI(null, null);
+  }
+
+  function editStop(idx) {
+    const stop = companyRouteStops[idx];
+    document.getElementById('formTitle').innerText = 'Edit Stop';
+    document.getElementById('editIndex').value = String(idx);
+    document.getElementById('stopName').value = stop.name || '';
+
+    const coords = (stop && stop.location && stop.location.coordinates) ? stop.location.coordinates : [0, 0];
+    const [lng, lat] = coords;
+    updateSelectedUI(Number(lat), Number(lng));
+
+    // Smooth scroll visualization focus to form
+    document.getElementById('stopName').focus();
+  }
+
+  async function saveStop() {
+    const editIndex = Number(document.getElementById('editIndex').value);
+    const payload = {
+      name: document.getElementById('stopName').value.trim(),
+      latitude: document.getElementById('stopLat').value.trim(),
+      longitude: document.getElementById('stopLng').value.trim()
+    };
+
+    if (!payload.name || !payload.latitude || !payload.longitude) {
+      return alert("Please set a point on the map and fill the stop name before saving.");
+    }
+
+    try {
+      if (editIndex >= 0) {
+        await apiCall(`/api/company/routes/${routeId}/stops/${editIndex}`, 'PUT', payload);
+      } else {
+        await apiCall(`/api/company/routes/${routeId}/stops`, 'POST', payload);
+      }
+      window.location.reload();
+    } catch (e) {}
+  }
+
+
+  async function deleteStop(idx) {
+    if (!confirm('Are you absolutely sure you want to permanently delete this stop node?')) return;
+    try {
+      await apiCall(`/api/company/routes/${routeId}/stops/${idx}`, 'DELETE');
+      window.location.reload();
+    } catch (e) {}
+  }
+
+  resetForm();
+</script>
+
+<%- include('partials/footer') %>

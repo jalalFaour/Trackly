@@ -1,0 +1,62 @@
+<%- include('partials/header') %>
+
+<div class="d-flex align-items-center justify-content-center bg-light" style="min-height: 85vh;">
+  <div class="container" style="max-width: 460px;">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 p-sm-5">
+
+        <div class="text-center mb-4">
+          <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 48px; height: 48px;">
+            <i class="bi bi-building-add fs-4"></i>
+          </div>
+          <h2 class="h4 fw-bold text-dark mb-1">Register Company</h2>
+          <p class="text-muted small mb-0">Create an operator account to manage your fleet</p>
+        </div>
+
+        <% if (authError) { %>
+        <div class="alert alert-danger d-flex align-items-center gap-2 border-0 bg-danger-subtle text-danger p-3 rounded-3 mb-4 small" role="alert">
+          <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+          <div><%= authError %></div>
+        </div>
+        <% } %>
+
+        <form method="POST" action="/auth/register">
+          <div class="form-floating mb-3">
+            <input class="form-control" type="text" id="companyNameInput" name="name" placeholder="Transit Corp" required autocomplete="organization">
+            <label for="companyNameInput" class="text-muted">Company Name</label>
+          </div>
+
+          <div class="form-floating mb-3">
+            <input class="form-control" type="email" id="emailInput" name="email" placeholder="name@company.com" required autocomplete="email">
+            <label for="emailInput" class="text-muted">Corporate Email</label>
+          </div>
+
+          <div class="form-floating mb-4">
+            <input class="form-control" type="password" id="passwordInput" name="password" placeholder="Password" minlength="6" required autocomplete="new-password">
+            <label for="passwordInput" class="text-muted">Password (Min. 6 characters)</label>
+          </div>
+
+          <button class="btn btn-primary btn-lg w-100 fs-6 fw-semibold py-2.5 shadow-sm rounded-3 d-flex align-items-center justify-content-center gap-2" type="submit">
+            Create Account <i class="bi bi-check-lg small"></i>
+          </button>
+        </form>
+
+        <div class="mt-4 pt-2 border-top text-center">
+          <span class="text-muted small">Already registered?</span>
+          <a href="/auth/login" class="small fw-semibold text-decoration-none ms-1">Back to login</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Clean component field focus behaviors */
+  .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+  }
+</style>
+
+<%- include('partials/footer') %>

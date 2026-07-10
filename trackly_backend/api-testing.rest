@@ -1,0 +1,181 @@
+@baseUrl = http://localhost:3000
+@json = application/json
+
+### ====== Company (dashboard + hardware) ======
+@companyApiSecret = aa580017-3701-470b-a5c4-f135a640d379
+@companyId = 69def3a658926a12b0006c4c
+@routeId = 69deff5984e8c0f2d5ac46be
+@chatId = 869328361
+@deviceId = BUS-DEV-0001
+@busId = 69def45150f15180d3d5dc3e
+
+### ====== Mobile user (JWT) ======
+# Mobile auth uses phone/password. Update these before running.
+@mobileName = Demo User
+@mobilePhone = +963944886200
+@mobilePassword = asdasd
+
+# Paste access token from the LOGIN request below into this variable.
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YTM4MGQ2ODNmZjM5NDIyOGE4MDhiM2UiLCJpYXQiOjE3ODI2Njk2NjMsImV4cCI6MTc4Mzk2NTY2M30.cNDSRNHYDBOCN5tuL4VvoMsYiaBSXqg_0-jqSfvWEXY
+
+### Health check by opening dashboard root (will redirect if not logged in)
+GET {{baseUrl}}/
+
+### ============================
+### Dashboard auth (company manager)
+### ============================
+### Register company manager (dashboard auth)
+POST {{baseUrl}}/auth/register
+Content-Type: application/x-www-form-urlencoded
+
+name=Demo Transit Company&email=demo%40company.com&password=123456
+
+### Login company manager (dashboard auth)
+POST {{baseUrl}}/auth/login
+Content-Type: application/x-www-form-urlencoded
+
+email=demo%40company.com&password=123456
+
+### Logout company manager
+POST {{baseUrl}}/auth/logout
+
+### ============================
+### Mobile app REST (Flutter)
+### Base paths:
+### - /api/mobile/auth/*
+### - /api/mobile/profile
+### - /api/mobile/wallet/*
+### ============================
+
+### Mobile signup
+POST {{baseUrl}}/api/mobile/auth/signup
+Content-Type: {{json}}
+
+{
+  "name": "{{mobileName}}",
+  "phone": "{{mobilePhone}}",
+  "password": "{{mobilePassword}}"
+}
+
+### Mobile login (captures tokens in response)
+POST {{baseUrl}}/api/mobile/auth/login
+Content-Type: {{json}}
+
+{
+  "phone": "{{mobilePhone}}",
+  "password": "{{mobilePassword}}"
+}
+
+### Mobile profile (requires access token)
+GET {{baseUrl}}/api/mobile/profile
+Authorization: Bearer {{accessToken}}
+
+### Add credit (requires access token)
+POST {{baseUrl}}/api/mobile/wallet/add-credit
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "amount": 100
+}
+
+### Get /wallet/deduct-price
+GET {{baseUrl}}/api/mobile/wallet/deduct-price
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+
+### Get credit balance (requires access token)
+GET {{baseUrl}}/api/mobile/wallet/balance
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+
+### Deduct credit for bus payment (requires access token)
+POST {{baseUrl}}/api/mobile/wallet/deduct
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "busId": "{{busId}}"
+}
+
+### GET all routes for all companies (requires access token)
+GET {{baseUrl}}/api/mobile/routes
+Content-Type: {{json}}
+Authorization: Bearer {{accessToken}}
+
+### ============================
+### Choose routes + live bus info (public)
+### ============================
+
+### Public routes list (all companies)
+GET {{baseUrl}}/api/mobile/public/routes
+
+### Public routes list by company
+GET {{baseUrl}}/api/mobile/public/routes?companyId={{companyId}}
+
+### Public active buses for a route (choose a route → show buses)
+GET {{baseUrl}}/api/mobile/public/routes/{{routeId}}/buses
+
+### Public nearest active bus for a route (map pin near bus)
+GET {{baseUrl}}/api/mobile/public/routes/{{routeId}}/nearest?latitude=36.1999&longitude=37.1499
+
+### ============================
+### Live map (SSE)
+### ============================
+# NOTE: Current backend SSE is protected by manager session auth (not mobile JWT).
+# Endpoint exists at: /api/realtime/sse
+# Use dashboard login to get your session cookie, then add it manually here.
+
+### Live map stream (SSE) - requires dashboard session cookie (not JWT)
+GET {{baseUrl}}/api/realtime/sse
+# Cookie: session=<PUT_SESSION_COOKIE_HERE>
+
+### ============================
+### Hardware ingestion (no mobile auth)
+### ============================
+### Create route from dashboard API (requires authenticated session cookie)
+POST {{baseUrl}}/api/routes
+Content-Type: {{json}}
+
+{
+  "routeName": "Line 10 - Downtown",
+  "coordinates": [
+    [37.1481231, 36.1984372],
+    [37.1582011, 36.2100000],
+    [37.1703333, 36.2208888]
+  ]
+}
+
+### Ingest location from hardware (no auth for now, stores data only)
+POST {{baseUrl}}/api/hardware/location
+Content-Type: {{json}}
+
+{
+  "apiSecret": "{{companyApiSecret}}",
+  "deviceId": "{{deviceId}}",
+  "busNumber": "BUS-12",
+  "routeId": "{{routeId}}",
+  "latitude": 36.1984372,
+  "longitude": 37.1481231,
+  "speed": 42,
+  "timestamp": "2026-04-14T12:00:00.000Z"
+}
+
+### Ingest + send summary to Telegram (no auth for now, this is the request that should message the bot)
+POST {{baseUrl}}/api/test/telegram
+Content-Type: {{json}}
+
+{
+  "apiSecret": "{{companyApiSecret}}",
+  "deviceId": "{{deviceId}}",
+  "busNumber": "BUS-12",
+  "routeId": "{{routeId}}",
+  "latitude": 36.2001000,
+  "longitude": 37.1509000,
+  "speed": 38,
+  "timestamp": "2026-04-14T12:05:00.000Z",
+  "chatId": "{{chatId}}"
+}
+
