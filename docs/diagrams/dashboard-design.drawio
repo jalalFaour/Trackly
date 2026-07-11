@@ -1,0 +1,91 @@
+<mxfile host="app.diagrams.net" modified="2026-07-11T21:43:00.000Z" agent="5.0" version="24.7.17">
+  <diagram id="dash-nav" name="Dashboard Navigation &amp; Feature Map">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0"><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="n0" value="/auth/login" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="60" y="120" width="180" height="80" as="geometry"/></mxCell>
+      <mxCell id="n1" value="/ (Dashboard Home)\n- routes list\n- revenue analytics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="320" y="100" width="240" height="120" as="geometry"/></mxCell>
+      <mxCell id="n2" value="/add-route" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="650" y="60" width="170" height="70" as="geometry"/></mxCell>
+      <mxCell id="n3" value="/view-route/:id\n- active buses\n- route details" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="650" y="160" width="200" height="100" as="geometry"/></mxCell>
+      <mxCell id="n4" value="/view-route/:id/stops\n- add/edit/delete/reorder" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="910" y="170" width="220" height="100" as="geometry"/></mxCell>
+      <mxCell id="n5" value="/buses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="650" y="300" width="170" height="70" as="geometry"/></mxCell>
+      <mxCell id="n6" value="/buses/:id/logs\n(live/history logs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="890" y="300" width="220" height="90" as="geometry"/></mxCell>
+      <mxCell id="n7" value="/api/realtime/sse\n(live tracking stream)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1"><mxGeometry x="320" y="300" width="240" height="90" as="geometry"/></mxCell>
+      <mxCell id="e1" style="endArrow=block;html=1;" edge="1" parent="1" source="n0" target="n1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="e2" style="endArrow=block;html=1;" edge="1" parent="1" source="n1" target="n2"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="e3" style="endArrow=block;html=1;" edge="1" parent="1" source="n1" target="n3"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="e4" style="endArrow=block;html=1;" edge="1" parent="1" source="n3" target="n4"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="e5" style="endArrow=block;html=1;" edge="1" parent="1" source="n1" target="n5"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="e6" style="endArrow=block;html=1;" edge="1" parent="1" source="n5" target="n6"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="e7" style="endArrow=block;html=1;" edge="1" parent="1" source="n1" target="n7"><mxGeometry relative="1" as="geometry"/></mxCell>
+    </root></mxGraphModel>
+  </diagram>
+  <diagram id="dash-class" name="Dashboard Class Diagram">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0"><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="d1" value="AuthController\n+ login/register/logout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="60" y="70" width="230" height="110" as="geometry"/></mxCell>
+      <mxCell id="d2" value="DashboardController\n+ showDashboard\n+ createRoute\n+ showRoutePage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="60" y="240" width="230" height="140" as="geometry"/></mxCell>
+      <mxCell id="d3" value="BusController + BusAdminController\n+ buses page/logs\n+ add/edit/delete bus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="60" y="440" width="250" height="130" as="geometry"/></mxCell>
+      <mxCell id="d4" value="AuthService\n+ authenticateCompany()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="380" y="80" width="240" height="90" as="geometry"/></mxCell>
+      <mxCell id="d5" value="RouteService + RouteAdminService\n+ getCompanyRoutes()\n+ createRouteForCompany()\n+ getRouteWithStopsForCompany()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="380" y="230" width="280" height="150" as="geometry"/></mxCell>
+      <mxCell id="d6" value="BusService + AdminCompanyService\n+ CRUD buses\n+ assignBusToRoute()\n+ stop management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="380" y="430" width="280" height="150" as="geometry"/></mxCell>
+      <mxCell id="d7" value="SessionAuth Middleware\n(requireSessionAuth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="750" y="80" width="230" height="90" as="geometry"/></mxCell>
+      <mxCell id="d8" value="Views (EJS)\n dashboard, add-route, buses, logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="750" y="240" width="260" height="110" as="geometry"/></mxCell>
+      <mxCell id="d9" value="Models\nCompany, Route, Bus, LocationLog" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1"><mxGeometry x="750" y="430" width="230" height="110" as="geometry"/></mxCell>
+      <mxCell id="de1" style="endArrow=block;html=1;" edge="1" parent="1" source="d1" target="d4"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de2" style="endArrow=block;html=1;" edge="1" parent="1" source="d2" target="d5"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de3" style="endArrow=block;html=1;" edge="1" parent="1" source="d3" target="d6"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de4" style="endArrow=block;html=1;" edge="1" parent="1" source="d2" target="d8"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de5" style="endArrow=block;html=1;" edge="1" parent="1" source="d3" target="d8"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de6" style="endArrow=block;html=1;" edge="1" parent="1" source="d5" target="d9"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de7" style="endArrow=block;html=1;" edge="1" parent="1" source="d6" target="d9"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de8" style="endArrow=block;html=1;" edge="1" parent="1" source="d1" target="d7"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de9" style="endArrow=block;html=1;" edge="1" parent="1" source="d2" target="d7"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="de10" style="endArrow=block;html=1;" edge="1" parent="1" source="d3" target="d7"><mxGeometry relative="1" as="geometry"/></mxCell>
+    </root></mxGraphModel>
+  </diagram>
+  <diagram id="dash-seq-login" name="Sequence - Admin Login">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0"><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="l1" value="Admin Browser" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="80" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="l2" value="AuthRoutes/Controller" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="300" y="40" width="140" height="820" as="geometry"/></mxCell>
+      <mxCell id="l3" value="AuthService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="530" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="l4" value="Company Model" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="740" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="l5" value="Session Store" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="950" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="le1" value="POST /auth/login" style="endArrow=block;html=1;" edge="1" parent="1" source="l1" target="l2"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="le2" value="authenticateCompany(email,password)" style="endArrow=block;html=1;" edge="1" parent="1" source="l2" target="l3"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="le3" value="find company + bcrypt.compare" style="endArrow=block;html=1;" edge="1" parent="1" source="l3" target="l4"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="le4" value="create session(companyId/company)" style="endArrow=block;html=1;" edge="1" parent="1" source="l2" target="l5"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="le5" value="redirect /" style="endArrow=block;html=1;" edge="1" parent="1" source="l2" target="l1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    </root></mxGraphModel>
+  </diagram>
+  <diagram id="dash-seq-live" name="Sequence - Live Tracking">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0"><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="s1" value="Admin Dashboard UI" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="80" y="40" width="130" height="820" as="geometry"/></mxCell>
+      <mxCell id="s2" value="Realtime Route" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="300" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="s3" value="SSE Broker" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="520" y="40" width="110" height="820" as="geometry"/></mxCell>
+      <mxCell id="s4" value="HardwareService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="730" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="s5" value="GPS Device" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="940" y="40" width="110" height="820" as="geometry"/></mxCell>
+      <mxCell id="se1" value="GET /api/realtime/sse" style="endArrow=block;html=1;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="se2" value="addClient(res)" style="endArrow=block;html=1;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="se3" value="POST /api/hardware/location" style="endArrow=block;html=1;" edge="1" parent="1" source="s5" target="s4"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="se4" value="broadcast(bus_location_updated)" style="endArrow=block;html=1;" edge="1" parent="1" source="s4" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="se5" value="SSE event message" style="endArrow=block;html=1;" edge="1" parent="1" source="s3" target="s1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="se6" value="map/list update" style="endArrow=block;html=1;" edge="1" parent="1" source="s1" target="s1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    </root></mxGraphModel>
+  </diagram>
+  <diagram id="dash-seq-mgmt" name="Sequence - Management Actions">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0"><root>
+      <mxCell id="0"/><mxCell id="1" parent="0"/>
+      <mxCell id="m1" value="Admin UI" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="80" y="40" width="120" height="820" as="geometry"/></mxCell>
+      <mxCell id="m2" value="Dashboard/BusAdmin Controller" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="290" y="40" width="160" height="820" as="geometry"/></mxCell>
+      <mxCell id="m3" value="RouteService / BusService" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="540" y="40" width="150" height="820" as="geometry"/></mxCell>
+      <mxCell id="m4" value="Route &amp; Bus Models" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="770" y="40" width="140" height="820" as="geometry"/></mxCell>
+      <mxCell id="me1" value="POST /api/routes or /api/buses" style="endArrow=block;html=1;" edge="1" parent="1" source="m1" target="m2"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="me2" value="validate + call service" style="endArrow=block;html=1;" edge="1" parent="1" source="m2" target="m3"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="me3" value="create/update DB records" style="endArrow=block;html=1;" edge="1" parent="1" source="m3" target="m4"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="me4" value="JSON success (updated entity)" style="endArrow=block;html=1;" edge="1" parent="1" source="m2" target="m1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      <mxCell id="me5" value="refresh dashboard state" style="endArrow=block;html=1;" edge="1" parent="1" source="m1" target="m1"><mxGeometry relative="1" as="geometry"/></mxCell>
+    </root></mxGraphModel>
+  </diagram>
+</mxfile>
